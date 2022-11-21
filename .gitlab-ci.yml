@@ -1,0 +1,84 @@
+image: alpine
+
+stages:
+  - install_dependencies
+  - production_build
+  - docker_image_build
+  - deploy_to_development
+  - deploy_to_production
+
+variables:
+  KUBECONFIG: /root/.kube/config
+  KANIKO_VERSION: "debug"
+
+before_script:
+  - apk add --update npm
+
+install_dependencies:
+  stage: install_dependencies
+  cache:
+    key: $CI_DEFAULT_BRANCH
+    paths:
+      - node_modules/
+  script:
+    - npm ci
+  only:
+    refs:
+      - main
+    changes:
+      - package-lock.json
+
+production_build:
+  stage: production_build
+  only:
+    - tags
+    - main
+  cache:
+    key: $CI_DEFAULT_BRANCH
+    paths:
+      - node_modules/
+    policy: pull
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
+
+docker_image_build:
+  image:
+    name: gcr.io/kaniko-project/executor:$KANIKO_VERSION
+    entrypoint: [""]
+  stage: docker_image_build
+  only:
+    - tags
+    - main
+  before_script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+  script:
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG --destination $CI_REGISTRY_IMAGE:latest
+
+deploy_to_development:
+  image: dtzar/helm-kubectl
+  stage: deploy_to_development
+  only:
+    - main
+  before_script:
+    - sed -ie "s/deploy-date-value/$(date)/g" kubernetes/deployment.yaml
+    - mkdir -p /root/.kube/ && touch $KUBECONFIG
+    - echo $KUBERNETES_KUBE_CONFIG | base64 -d > $KUBECONFIG
+  script:
+    - kubectl apply -f kubernetes/deployment.yaml
+
+deploy_to_production:
+  image: dtzar/helm-kubectl
+  stage: deploy_to_production
+  only:
+    - tags
+  before_script:
+    - sed -ie "s/deploy-date-value/$(date)/g" kubernetes/production.yaml
+    - mkdir -p /root/.kube/ && touch $KUBECONFIG
+    - echo $KUBERNETES_KUBE_CONFIG | base64 -d > $KUBECONFIG
+  script:
+    - kubectl apply -f kubernetes/production.yaml

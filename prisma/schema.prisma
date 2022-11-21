@@ -1,0 +1,39 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  UUID String @db.VarChar(36) @id @default(uuid())
+  VKID Int @unique
+  isAuth Boolean
+  prizes Prize[]
+}
+
+model Prize {
+  UUID String @db.VarChar(36) @id @default(uuid())
+  title String @db.VarChar
+  probability Float
+  degree Int @db.SmallInt
+  type PrizeType @default(simple)
+  link Json? @db.JsonB
+  promocode String? @default("")
+  description String? @db.VarChar
+  date DateTime? @db.Date
+  users User[]
+}
+
+model Setting {
+  UUID String @db.VarChar(36) @id @default(uuid())
+  seeded Boolean
+}
+
+enum PrizeType {
+  physical
+  special
+  simple
+}

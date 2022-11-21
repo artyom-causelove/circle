@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lomonosov-school-circle-server-side
+  namespace: development
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  minReadySeconds: 5
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-development-lomonosov-school-circle-server-side
+  template:
+    metadata:
+      labels:
+        app: lomonosov-school-circle-server-side
+      annotations:
+        deploy-date: "deploy-date-value"

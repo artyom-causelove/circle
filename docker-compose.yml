@@ -1,0 +1,55 @@
+version: '3'
+
+volumes:
+  pg_project:
+
+services:
+  nodejs:
+    image: node:12-alpine
+    container_name: nodejs
+    restart: unless-stopped
+    working_dir: /home/node/app
+    volumes:
+      - ./:/home/node/app
+    expose:
+      - "8080"
+    command: "sh ./docker-scripts/node_start.sh"
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  webserver:
+    image: nginx:mainline-alpine
+    container_name: webserver
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx-conf:/etc/nginx/conf.d
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/nginx/logs:/var/log/nginx
+    depends_on:
+      - nodejs
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - pg_project:/var/lib/postgresql/data
+    networks:
+      - app-network
+    ports:
+      - 5433:5432
+
+networks:
+  app-network:
+    driver: bridge

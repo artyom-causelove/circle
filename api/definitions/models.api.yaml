@@ -1,0 +1,71 @@
+definitions:
+  IMeta:
+    properties:
+      token:
+        type: "string"
+        
+  AppResponse:
+    properties:
+      data:
+        type: "object"
+      meta:
+        allOf:
+        - $ref: "#/definitions/IMeta"
+      error:
+        type: "array"
+        items:
+          type: "string"
+      status:
+        type: "boolean"
+        
+  User:
+    properties:
+      UUID:
+        type: "string"
+      VKID:
+        type: "integer"
+        format: "int32"
+      isAuth:
+        type: "boolean"
+        default: true
+  SafeUser:
+    properties:
+      isAuth:
+        type: "boolean"
+        
+  SafePrize:
+    properties:
+      title:
+        type: "string"
+      degree:
+        type: "integer"
+        format: "int32"
+      description:
+        type: "string"
+        
+  CreateUserDTO:
+    properties:
+      VKID:
+        type: "integer"
+        format: "int32"
+        
+  PatchUserIsAuthDTO:
+    properties:
+      isAuth:
+        type: "boolean"
+        
+  CreateUserResponse:
+    allOf:
+    - $ref: "#/definitions/AppResponse"
+    properties:
+      data:
+        allOf:
+        - $ref: "#/definitions/User"
+        
+  PatchUserIsAuthResponse:
+    allOf:
+    - $ref: "#/definitions/SafeUser"
+  
+  CreateUserPrizeResponse:
+    allOf:
+    - $ref: "#/definitions/SafePrize"

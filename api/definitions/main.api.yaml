@@ -1,0 +1,12 @@
+swagger: "2.0"
+info:
+  description: "Lomonosov project that gives some prizes to users"
+  version: "1.0.0"
+  title: "Lomonosov Circle"
+  contact:
+    email: "causelove@noname.team"
+host:  "development.lomonosov.tech"
+basePath: "/api/v1"
+schemes:
+- "https"
+- "http"

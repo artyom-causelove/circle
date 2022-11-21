@@ -1,0 +1,101 @@
+- /users:
+    post:
+      tags:
+      - "User"
+      summary: "Create (register) user"
+      description: "Creates new user if it doesn't exist and generates bearer token"
+      operationId: "createUser"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "User payload object"
+        required: true
+        schema:
+          $ref: "#/definitions/CreateUserDTO"
+      responses:
+        "201":
+          description: "User successfuly created"
+          schema:
+            $ref: "#/definitions/CreateUserResponse"
+        "400":
+          description: "Invalid body params"
+          schema:
+            $ref: "#/definitions/AppResponse"
+        "403":
+          description: "User has't access to the resource"
+          schema:
+            $ref: "#/definitions/AppResponse"
+
+- /users/{userUUIDorVKID}/is-auth:
+    patch:
+      tags:
+      - "User"
+      summary: "Update user's is-auth field (login)"
+      description: "Updates user's is-auth field and generates bearer token"
+      operationId: "patchUserIsAuth"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "userUUIDorVKID"
+        type: "string"
+        required: true
+        description: "User's UUID or VKID for giving"
+      - in: "body"
+        name: "body"
+        description: "Patch user is-auth payload object and generates bearer token"
+        schema:
+          $ref: "#/definitions/PatchUserIsAuthDTO"
+      responses:
+        "200":
+          description: "User successfuly created"
+          schema:
+            $ref: "#/definitions/PatchUserIsAuthResponse"
+        "400":
+          description: "Invalid body or request params"
+          schema:
+            $ref: "#/definitions/AppResponse"
+        "403":
+          description: "User has't access to the resource"
+          schema:
+            $ref: "#/definitions/AppResponse"
+          
+- /users/{userUUID}/prizes:
+    post:
+      tags:
+      - "User"
+      - "Prize"
+      summary: "Create new user's prize"
+      description: "Gives new prize to user, if he has a try"
+      operationId: "createUserPrize"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "userUUID"
+        type: "string"
+        required: true
+        description: "User's UUID for giving"
+      responses:
+        "201":
+          description: "User's prize successfuly created"
+          schema:
+            $ref: "#/definitions/CreateUserPrizeResponse"
+        "400":
+          description: "Invalid request params"
+          schema:
+            $ref: "#/definitions/AppResponse"
+        "403":
+          description: "User has't access to the resource"
+          schema:
+            $ref: "#/definitions/AppResponse"
+      security:
+      - jwtToken: []
